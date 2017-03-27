@@ -89,9 +89,9 @@ def resample(image, scan, new_spacing=[1, 1, 1]):
 def plot_3d(image, threshold=-300):
     # Position the scan upright,
     # so the head of the patient would be at the top facing the camera
-    p = image.transpose(2, 1, 0)
+    # p = image.transpose(2, 1, 0)
 
-    verts, faces = measure.marching_cubes(p, threshold)
+    verts, faces = measure.marching_cubes(image, threshold)
 
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111, projection='3d')
@@ -102,9 +102,9 @@ def plot_3d(image, threshold=-300):
     mesh.set_facecolor(face_color)
     ax.add_collection3d(mesh)
 
-    ax.set_xlim(0, p.shape[0])
-    ax.set_ylim(0, p.shape[1])
-    ax.set_zlim(0, p.shape[2])
+    ax.set_xlim(0, image.shape[0])
+    ax.set_ylim(0, image.shape[1])
+    ax.set_zlim(0, image.shape[2])
 
     plt.show()
 
@@ -164,18 +164,25 @@ def segment_lung_mask(image, fill_lung_structures=True):
 # MIN_BOUND = -1000.0
 # MAX_BOUND = 400.0
 # PIXEL_MEAN = 0.25
-def normalize(image, min_bound=-1000.0, max_bound=400, pixel_mean=.25):
+def normalize(image, min_bound=-1000, max_bound=400):
     image = (image - min_bound) / (max_bound - min_bound)
-    image[image>(1-pixel_mean)] = 1.
-    image[image<(0-pixel_mean)] = 0.
+    image[image > 1] = 1.
+    image[image < 0] = 0.
     return image
 
 
 # DO THIS OFFLINE
 # pixel_corr = 350
-def zero_center(image, pixel_corr=350):
-    image = image - pixel_corr
+def zero_center(image, pixel_mean=350):
+    image = image - pixel_mean
     return image
+
+
+def resize(img, shape=(50, 50, 20)):
+    img = img.transpose(2, 1, 0)
+    zoom_factors = [i/float(j) for i, j in zip(shape, img.shape)]
+    img = scipy.ndimage.interpolation.zoom(img, zoom=zoom_factors)
+    return img
 
 
 def save(arr, pth):
@@ -205,29 +212,42 @@ def main():
 
         pix_resampled, spacing = resample(curr_patient_pixels, curr_patient, [1, 1, 1])
 
+        del curr_patient
+        del curr_patient_pixels
+
         # TODO: remember to first apply a dilation morphological operation
         # Not sure exactly what that means
         segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
+        # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
 
-        pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
+        pix_resampled = normalize(pix_resampled, min_bound=args.min_bound,
+                                     max_bound=args.max_bound)
 
-        zero_centered_image = zero_center(segmented_lungs_fill_masked, pixel_corr=pixel_corr)
+        pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
 
-        save(zero_centered_image, os.path.join(args.output, '%s.npz' % patient))
+        pix_resampled = resize(pix_resampled, shape=(50, 50, 20))
+
+        pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
+
+        # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
+        #
+        # zero_centered_image = zero_center(segmented_lungs_fill_masked, pixel_corr=pixel_corr)
+
+        save(pix_resampled, os.path.join(args.output, '%s.npz' % patient))
 
         # Assert all the shapes are the same
         # if i > 0:
         #     assert last_shape == zero_centered_image.shape
 
-        last_shape = zero_centered_image.shape
+        last_shape = pix_resampled.shape
         print(last_shape)
 
         if args.debug:
             loaded = load(os.path.join(args.output, '%s.npz' % patient))
-            assert (loaded == zero_centered_image).all()
+            assert (loaded == pix_resampled).all()
             break
 
-        print('Files processed: %d' % i)
+        print('Files processed: %d' % i + 1)
 
     # DO THIS ONLINE
     # segmented_lungs_fill = normalize(segmented_lungs_fill, min_bound=args.min_bound, max_bound=args.max_bound)
