@@ -121,6 +121,12 @@ def largest_label_volume(im, bg=-1):
         return None
 
 
+def plot_slice(img, slice=80):
+    # Show some slice in the middle
+    plt.imshow(img[slice])
+    plt.show()
+
+
 def segment_lung_mask(image, fill_lung_structures=True):
     # not actually binary, but 1 and 2.
     # 0 is treated as background, which we do not want
@@ -131,7 +137,8 @@ def segment_lung_mask(image, fill_lung_structures=True):
     #   Improvement: Pick multiple background labels from around the patient
     #   More resistant to "trays" on which the patient lays cutting the air
     #   around the person in half
-    background_label = labels[0, 0, 0]
+    background_labels = labels[0, 0, 0], labels[0, 0, -1], labels[0, -1, 0], labels[-1, 0, 0]
+    background_label = np.argmax(np.bincount(background_labels))
 
     # Fill the air around the person
     binary_image[background_label == labels] = 2
@@ -216,6 +223,8 @@ def main():
         del curr_patient_pixels
 
         # TODO: remember to first apply a dilation morphological operation
+
+        pix_resampled = morphology.dilation(pix_resampled)
         # Not sure exactly what that means
         segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
         # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
@@ -225,9 +234,11 @@ def main():
 
         pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
 
-        pix_resampled = resize(pix_resampled, shape=(50, 50, 20))
+        pix_resampled = resize(pix_resampled, shape=(200, 200, 80))
 
         pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
+
+        plot_3d(pix_resampled, 0)
 
         # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
         #
@@ -247,7 +258,7 @@ def main():
             assert (loaded == pix_resampled).all()
             break
 
-        print('Files processed: %d' % i + 1)
+        print('Files processed: %d' % (i + 1))
 
     # DO THIS ONLINE
     # segmented_lungs_fill = normalize(segmented_lungs_fill, min_bound=args.min_bound, max_bound=args.max_bound)
