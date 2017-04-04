@@ -7,9 +7,6 @@ import argparse
 import os
 
 import numpy as np
-import matplotlib.pyplot as plt
-from skimage import measure, morphology
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 DESCRIPTION = """
 Explain the script here
@@ -27,29 +24,6 @@ def make_arg_parser():
     return parser
 
 
-def plot_3d(image, threshold=-100):
-    # Position the scan upright,
-    # so the head of the patient would be at the top facing the camera
-    p = image
-
-    verts, faces = measure.marching_cubes(p, threshold)
-
-    fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Fancy indexing: `verts[faces]` to generate a collection of triangles
-    mesh = Poly3DCollection(verts[faces], alpha=0.70)
-    face_color = [0.45, 0.45, 0.75]
-    mesh.set_facecolor(face_color)
-    ax.add_collection3d(mesh)
-
-    ax.set_xlim(0, p.shape[0])
-    ax.set_ylim(0, p.shape[1])
-    ax.set_zlim(0, p.shape[2])
-
-    plt.show()
-
-
 # Driver function
 def main():
     parser = make_arg_parser()
@@ -62,16 +36,13 @@ def main():
     patients.sort()
 
     for patient in patients:
-        patient_path = os.path.join(input_folder, patient)
-        img = load(patient_path)
-        print(img.min())
-        print(img.max())
-        print(patient)
-        plot_3d(img, -.2)
-    #
-    # img = load(args.input)
-    #
-    #
+        if patient == '1c42a5da837f4122d2c3b59ca9b5f0fb.npz':
+            patient_path = os.path.join(input_folder, patient)
+            img = load(patient_path)
+            print(img.min())
+            print(img.max())
+            print(patient)
+            plot_3d(img, -.2)
 
 # Used for thread safety
 if __name__ == '__main__':

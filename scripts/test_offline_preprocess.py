@@ -3,14 +3,14 @@ from __future__ import print_function, division
 import argparse
 
 import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import dicom
 import os
 import scipy.ndimage
-import matplotlib.pyplot as plt
 
 from skimage import measure, morphology
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import time
+
+from common import save, load
 
 DESCRIPTION = """
 Explain the script here
@@ -81,32 +81,9 @@ def resample(image, scan, new_spacing=[1, 1, 1]):
     real_resize_factor = new_shape / image.shape
     new_spacing = spacing / real_resize_factor
 
-    image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, mode='nearest')
+    image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, order=1, mode='nearest')
 
     return image, new_spacing
-
-
-def plot_3d(image, threshold=-300):
-    # Position the scan upright,
-    # so the head of the patient would be at the top facing the camera
-    # p = image.transpose(2, 1, 0)
-
-    verts, faces = measure.marching_cubes(image, threshold)
-
-    fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Fancy indexing: `verts[faces]` to generate a collection of triangles
-    mesh = Poly3DCollection(verts[faces], alpha=0.70)
-    face_color = [0.45, 0.45, 0.75]
-    mesh.set_facecolor(face_color)
-    ax.add_collection3d(mesh)
-
-    ax.set_xlim(0, image.shape[0])
-    ax.set_ylim(0, image.shape[1])
-    ax.set_zlim(0, image.shape[2])
-
-    plt.show()
 
 
 def largest_label_volume(im, bg=-1):
@@ -119,12 +96,6 @@ def largest_label_volume(im, bg=-1):
         return vals[np.argmax(counts)]
     else:
         return None
-
-
-def plot_slice(img, slice=80):
-    # Show some slice in the middle
-    plt.imshow(img[slice])
-    plt.show()
 
 
 def segment_lung_mask(image, fill_lung_structures=True):
@@ -188,17 +159,8 @@ def zero_center(image, pixel_mean=350):
 def resize(img, shape=(50, 50, 20)):
     img = img.transpose(2, 1, 0)
     zoom_factors = [i/float(j) for i, j in zip(shape, img.shape)]
-    img = scipy.ndimage.interpolation.zoom(img, zoom=zoom_factors)
+    img = scipy.ndimage.interpolation.zoom(img, zoom=zoom_factors, order=1, mode='nearest')
     return img
-
-
-def save(arr, pth):
-    with open(pth, 'wb+') as fh:
-        np.savez_compressed(fh, data=arr)
-
-
-def load(pth):
-    return np.load(pth)['data']
 
 
 # Driver function
@@ -214,6 +176,7 @@ def main():
 
     # All patients
     for i, patient in enumerate(patients):
+        t0 = time.clock()
         curr_patient = load_scan(os.path.join(input_folder, patient))
         curr_patient_pixels = get_pixels_hu(curr_patient)
 
@@ -234,11 +197,12 @@ def main():
 
         pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
 
-        pix_resampled = resize(pix_resampled, shape=(200, 200, 80))
+        print(pix_resampled.shape)
+        pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
 
         pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
 
-        plot_3d(pix_resampled, 0)
+        # plot_3d(pix_resampled, os.path.join(args.output, '%s.svg' % patient), threshold=0)
 
         # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
         #
@@ -259,6 +223,7 @@ def main():
             break
 
         print('Files processed: %d' % (i + 1))
+        print('Time for file: %.5f' % (time.clock() - t0))
 
     # DO THIS ONLINE
     # segmented_lungs_fill = normalize(segmented_lungs_fill, min_bound=args.min_bound, max_bound=args.max_bound)
