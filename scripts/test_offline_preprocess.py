@@ -2,6 +2,8 @@
 from __future__ import print_function, division
 import argparse
 
+from multiprocessing import Pool, cpu_count
+
 import numpy as np # linear algebra
 import dicom
 import os
@@ -163,6 +165,58 @@ def resize(img, shape=(50, 50, 20)):
     return img
 
 
+def process_patient(fargs):
+    input_folder, outfile, args = fargs
+    t0 = time.clock()
+    patient = load_scan(input_folder)
+    curr_patient_pixels = get_pixels_hu(patient)
+
+    pix_resampled, spacing = resample(curr_patient_pixels, patient, [1, 1, 1])
+
+    del patient
+    del curr_patient_pixels
+
+    # TODO: remember to first apply a dilation morphological operation
+
+    pix_resampled = morphology.dilation(pix_resampled)
+    # Not sure exactly what that means
+    segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
+    # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
+
+    pix_resampled = normalize(pix_resampled, min_bound=args.min_bound,
+                              max_bound=args.max_bound)
+
+    pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
+
+    print(pix_resampled.shape)
+    pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
+
+    pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
+
+    # plot_3d(pix_resampled, os.path.join(args.output, '%s.svg' % patient), threshold=0)
+
+    # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
+    #
+    # zero_centered_image = zero_center(segmented_lungs_fill_masked, pixel_corr=pixel_corr)
+
+    save(pix_resampled, os.path.join(outfile))
+
+    # Assert all the shapes are the same
+    # if i > 0:
+    #     assert last_shape == zero_centered_image.shape
+
+    last_shape = pix_resampled.shape
+    print(last_shape)
+
+    # if args.debug:
+    #     loaded = load(os.path.join(args.output, '%s.npz' % patient))
+    #     assert (loaded == pix_resampled).all()
+
+    #
+    print('Time for file: %.5f' % (time.clock() - t0))
+    return 'Filename'
+
+
 # Driver function
 def main():
     parser = make_arg_parser()
@@ -173,59 +227,16 @@ def main():
     input_folder = os.path.abspath(input_folder)
     patients = os.listdir(input_folder)
     patients.sort()
+    patients = ((os.path.join(input_folder, patient), os.path.join(args.output, '%s.npz' % patient), args) for patient in patients if not os.path.exists(os.path.join(args.output, '%s.npz' % patient)))
 
-    # All patients
-    for i, patient in enumerate(patients):
-        outfile = os.path.join(args.output, '%s.npz' % patient)
-        if os.path.exists(outfile):
-            t0 = time.clock()
-            curr_patient = load_scan(os.path.join(input_folder, patient))
-            curr_patient_pixels = get_pixels_hu(curr_patient)
+    p = Pool(cpu_count())
 
-            pix_resampled, spacing = resample(curr_patient_pixels, curr_patient, [1, 1, 1])
+    results = p.map(process_patient, patients)
+    for i, x in enumerate(results):
+        print('Files processed: %d' % (i + 1))
 
-            del curr_patient
-            del curr_patient_pixels
-
-            # TODO: remember to first apply a dilation morphological operation
-
-            pix_resampled = morphology.dilation(pix_resampled)
-            # Not sure exactly what that means
-            segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
-            # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
-
-            pix_resampled = normalize(pix_resampled, min_bound=args.min_bound,
-                                         max_bound=args.max_bound)
-
-            pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
-
-            print(pix_resampled.shape)
-            pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
-
-            pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
-
-            # plot_3d(pix_resampled, os.path.join(args.output, '%s.svg' % patient), threshold=0)
-
-            # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
-            #
-            # zero_centered_image = zero_center(segmented_lungs_fill_masked, pixel_corr=pixel_corr)
-
-            save(pix_resampled, os.path.join(outfile))
-
-            # Assert all the shapes are the same
-            # if i > 0:
-            #     assert last_shape == zero_centered_image.shape
-
-            last_shape = pix_resampled.shape
-            print(last_shape)
-
-            if args.debug:
-                loaded = load(os.path.join(args.output, '%s.npz' % patient))
-                assert (loaded == pix_resampled).all()
-                break
-
-            print('Files processed: %d' % (i + 1))
-            print('Time for file: %.5f' % (time.clock() - t0))
+    p.close()
+    p.join()
 
     # DO THIS ONLINE
     # segmented_lungs_fill = normalize(segmented_lungs_fill, min_bound=args.min_bound, max_bound=args.max_bound)
