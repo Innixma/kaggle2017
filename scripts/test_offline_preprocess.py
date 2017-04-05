@@ -176,54 +176,56 @@ def main():
 
     # All patients
     for i, patient in enumerate(patients):
-        t0 = time.clock()
-        curr_patient = load_scan(os.path.join(input_folder, patient))
-        curr_patient_pixels = get_pixels_hu(curr_patient)
+        outfile = os.path.join(args.output, '%s.npz' % patient)
+        if os.path.exists(outfile):
+            t0 = time.clock()
+            curr_patient = load_scan(os.path.join(input_folder, patient))
+            curr_patient_pixels = get_pixels_hu(curr_patient)
 
-        pix_resampled, spacing = resample(curr_patient_pixels, curr_patient, [1, 1, 1])
+            pix_resampled, spacing = resample(curr_patient_pixels, curr_patient, [1, 1, 1])
 
-        del curr_patient
-        del curr_patient_pixels
+            del curr_patient
+            del curr_patient_pixels
 
-        # TODO: remember to first apply a dilation morphological operation
+            # TODO: remember to first apply a dilation morphological operation
 
-        pix_resampled = morphology.dilation(pix_resampled)
-        # Not sure exactly what that means
-        segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
-        # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
+            pix_resampled = morphology.dilation(pix_resampled)
+            # Not sure exactly what that means
+            segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
+            # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
 
-        pix_resampled = normalize(pix_resampled, min_bound=args.min_bound,
-                                     max_bound=args.max_bound)
+            pix_resampled = normalize(pix_resampled, min_bound=args.min_bound,
+                                         max_bound=args.max_bound)
 
-        pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
+            pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
 
-        print(pix_resampled.shape)
-        pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
+            print(pix_resampled.shape)
+            pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
 
-        pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
+            pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
 
-        # plot_3d(pix_resampled, os.path.join(args.output, '%s.svg' % patient), threshold=0)
+            # plot_3d(pix_resampled, os.path.join(args.output, '%s.svg' % patient), threshold=0)
 
-        # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
-        #
-        # zero_centered_image = zero_center(segmented_lungs_fill_masked, pixel_corr=pixel_corr)
+            # pixel_corr = int((args.max_bound - args.min_bound) * args.pixel_mean)  # in this case, 350
+            #
+            # zero_centered_image = zero_center(segmented_lungs_fill_masked, pixel_corr=pixel_corr)
 
-        save(pix_resampled, os.path.join(args.output, '%s.npz' % patient))
+            save(pix_resampled, os.path.join(outfile))
 
-        # Assert all the shapes are the same
-        # if i > 0:
-        #     assert last_shape == zero_centered_image.shape
+            # Assert all the shapes are the same
+            # if i > 0:
+            #     assert last_shape == zero_centered_image.shape
 
-        last_shape = pix_resampled.shape
-        print(last_shape)
+            last_shape = pix_resampled.shape
+            print(last_shape)
 
-        if args.debug:
-            loaded = load(os.path.join(args.output, '%s.npz' % patient))
-            assert (loaded == pix_resampled).all()
-            break
+            if args.debug:
+                loaded = load(os.path.join(args.output, '%s.npz' % patient))
+                assert (loaded == pix_resampled).all()
+                break
 
-        print('Files processed: %d' % (i + 1))
-        print('Time for file: %.5f' % (time.clock() - t0))
+            print('Files processed: %d' % (i + 1))
+            print('Time for file: %.5f' % (time.clock() - t0))
 
     # DO THIS ONLINE
     # segmented_lungs_fill = normalize(segmented_lungs_fill, min_bound=args.min_bound, max_bound=args.max_bound)
