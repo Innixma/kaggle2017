@@ -10,6 +10,7 @@ import os
 import scipy.ndimage
 
 from skimage import measure, morphology
+from skimage.segmentation import clear_border
 import time
 
 from common import save, load
@@ -103,15 +104,25 @@ def largest_label_volume(im, bg=-1):
 def segment_lung_mask(image, fill_lung_structures=True):
     # not actually binary, but 1 and 2.
     # 0 is treated as background, which we do not want
-    binary_image = np.array(image > -320, dtype=np.int8) + 1
+    binary_image = np.array(image > -400, dtype=np.int8) + 1
+    binary_image = np.array([clear_border(binary_image[i]) for i in range(binary_image.shape[0])])
     labels = measure.label(binary_image)
 
     # Pick the pixel in the very corner to determine which label is air.
     #   Improvement: Pick multiple background labels from around the patient
     #   More resistant to "trays" on which the patient lays cutting the air
     #   around the person in half
-    background_labels = labels[0, 0, 0], labels[0, 0, -1], labels[0, -1, 0], labels[-1, 0, 0]
-    background_label = np.argmax(np.bincount(background_labels))
+    # for corner in labels[0, 0, :], labels[0, -1, :], labels[-1, -1, :], labels[-1, 0, :]:
+    #     background_label = np.argmax(np.bincount(corner))
+    #
+    #     # Fill the air around the person
+    #     binary_image[background_label == labels] = 2
+
+    # Pick the pixel in the very corner to determine which label is air.
+    #   Improvement: Pick multiple background labels from around the patient
+    #   More resistant to "trays" on which the patient lays cutting the air
+    #   around the person in half
+    background_label = labels[0, 0, 0]
 
     # Fill the air around the person
     binary_image[background_label == labels] = 2
@@ -165,6 +176,14 @@ def resize(img, shape=(50, 50, 20)):
     return img
 
 
+def add_zero_padding(ndarray):
+    max_dim = np.max(ndarray.shape)
+    zeros = np.zeros(shape=[max_dim]*3)
+    offsets = np.round((max_dim - ndarray.shape) / 2)
+    zeros[offsets[0]:ndarray.shape[0]+offsets[0], offsets[1]:ndarray.shape[1]+offsets[1], offsets[2]:ndarray.shape[2]+offsets[2]] = ndarray
+    return zeros
+
+
 def process_patient(fargs):
     input_folder, outfile, args = fargs
     t0 = time.clock()
@@ -176,19 +195,31 @@ def process_patient(fargs):
     del patient
     del curr_patient_pixels
 
-    # TODO: remember to first apply a dilation morphological operation
 
-    pix_resampled = morphology.dilation(pix_resampled)
     # Not sure exactly what that means
     segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
+
+    print(np.sum(segmented_lungs_fill_masked) / float(np.prod(segmented_lungs_fill_masked.shape)))
+    # Take care of some edge cases
+    if np.sum(segmented_lungs_fill_masked) / float(np.prod(segmented_lungs_fill_masked.shape)) <= .01:
+        print("Corner Case found with patient %s" % input_folder)
+        pix_resampled = morphology.closing(pix_resampled, morphology.ball(2))
+        segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
+
+    # TODO: remember to first apply a dilation morphological operation
+    segmented_lungs_fill_masked = morphology.binary_dilation(segmented_lungs_fill_masked, morphology.ball(2))
+
     # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
 
     pix_resampled = normalize(pix_resampled, min_bound=args.min_bound,
                               max_bound=args.max_bound)
 
     pix_resampled = np.multiply(pix_resampled, segmented_lungs_fill_masked)
+    # pix_resampled = get_segmented_lungs(pix_resampled)
 
     print(pix_resampled.shape)
+    # Added to keep consistent zoom
+    pix_resampled = add_zero_padding(pix_resampled)
     pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
 
     pix_resampled = zero_center(pix_resampled, pixel_mean=args.pixel_mean)
