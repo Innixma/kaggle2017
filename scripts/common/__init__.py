@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from skimage import measure, morphology
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import numpy as np
-
+import pandas as pd
 
 def plot_slice(img, slice=80):
     # Show some slice in the middle
@@ -37,5 +37,10 @@ def save(arr, pth):
     with open(pth, 'wb+') as fh:
         np.savez_compressed(fh, data=arr)
 
+
 def load(pth):
     return np.load(pth)['data']
+
+
+def read_mapping_file(pth):
+    return pd.read_csv(pth)

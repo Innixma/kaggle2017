@@ -38,11 +38,15 @@ def make_arg_parser():
 def load_scan(path):
     slices = [dicom.read_file(os.path.join(path, s)) for s in os.listdir(path)]
     slices.sort(key=lambda x: float(x.ImagePositionPatient[2]))
-    try:
-        slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
-    except:
-        slice_thickness = np.abs(slices[0].SliceLocation - slices[1].SliceLocation)
-
+    slice_thickness = 0
+    index = 0
+    while slice_thickness == 0:
+        try:
+            slice_thickness = slices[index].SliceLocation - slices[index+1].SliceLocation
+        except AttributeError:
+            slice_thickness = slices[index].ImagePositionPatient[2] - slices[index+1].ImagePositionPatient[2]
+        index += 1
+    slice_thickness = np.abs(slice_thickness)
     for s in slices:
         s.SliceThickness = slice_thickness
 
@@ -78,10 +82,15 @@ def resample(image, scan, new_spacing=[1, 1, 1]):
     # Determine current pixel spacing
     spacing = np.array([scan[0].SliceThickness] + scan[0].PixelSpacing, dtype=np.float32)
 
+    #debugging
+    # b8bb02d229361a623a4dc57aa0e5c485
+
     resize_factor = spacing / new_spacing
     new_real_shape = image.shape * resize_factor
     new_shape = np.round(new_real_shape)
     real_resize_factor = new_shape / image.shape
+    # This is breaking occasionally
+    # new_spacing = spacing / real_resize_factor
     new_spacing = spacing / real_resize_factor
 
     image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, order=1, mode='nearest')
@@ -188,7 +197,13 @@ def process_patient(fargs):
     input_folder, outfile, args = fargs
     t0 = time.clock()
     patient = load_scan(input_folder)
+
     curr_patient_pixels = get_pixels_hu(patient)
+
+    # DEBUG
+    # print(curr_patient_pixels.shape)
+    # if (np.array(curr_patient_pixels.shape) == 0).any():
+    #     print(input_folder)
 
     pix_resampled, spacing = resample(curr_patient_pixels, patient, [1, 1, 1])
 
@@ -206,7 +221,7 @@ def process_patient(fargs):
         pix_resampled = morphology.closing(pix_resampled, morphology.ball(2))
         segmented_lungs_fill_masked = segment_lung_mask(pix_resampled, True)
 
-    # TODO: remember to first apply a dilation morphological operation
+    # Apply a dilation morphological operation to include noduels on the lung wall
     segmented_lungs_fill_masked = morphology.binary_dilation(segmented_lungs_fill_masked, morphology.ball(2))
 
     # plot_3d(segmented_lungs_fill_masked - segmented_lungs, 0)
@@ -219,6 +234,7 @@ def process_patient(fargs):
 
     print(pix_resampled.shape)
     # Added to keep consistent zoom
+    # TODO: Resample all to the same initial shape before downsizing (This will keep 1 voxel being 1x1x1 mm
     pix_resampled = add_zero_padding(pix_resampled)
     pix_resampled = resize(pix_resampled, shape=(120, 120, 120))
 
