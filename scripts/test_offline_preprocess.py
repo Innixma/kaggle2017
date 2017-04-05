@@ -179,7 +179,7 @@ def resize(img, shape=(50, 50, 20)):
 def add_zero_padding(ndarray):
     max_dim = np.max(ndarray.shape)
     zeros = np.zeros(shape=[max_dim]*3)
-    offsets = np.round((max_dim - ndarray.shape) / 2)
+    offsets = np.array((max_dim - ndarray.shape) / 2, dtype=np.int8)
     zeros[offsets[0]:ndarray.shape[0]+offsets[0], offsets[1]:ndarray.shape[1]+offsets[1], offsets[2]:ndarray.shape[2]+offsets[2]] = ndarray
     return zeros
 
