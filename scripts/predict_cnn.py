@@ -103,7 +103,9 @@ def build_network():
     model.compile(loss='categorical_crossentropy',
                   optimizer='adadelta',
                   metrics=['accuracy'])
-
+    
+    print(model.summary())
+    
     return model
 
 
