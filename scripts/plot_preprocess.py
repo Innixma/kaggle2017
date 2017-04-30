@@ -5,6 +5,7 @@
 
 import argparse
 import os
+from common import plot_3d
 
 import numpy as np
 
@@ -20,7 +21,6 @@ def load(pth):
 def make_arg_parser():
     parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument('-i', '--input', help='<PATH> The input folder', type=str, required=True)
-    parser.add_argument('-o', '--output', help='<PATH> The output folder', type=str, required=True)
     return parser
 
 
@@ -36,7 +36,7 @@ def main():
     patients.sort()
 
     for patient in patients:
-        if patient == '1c42a5da837f4122d2c3b59ca9b5f0fb.npz':
+        if patient == 'fb57fc6377fd37bb5d42756c2736586c.npz':
             patient_path = os.path.join(input_folder, patient)
             img = load(patient_path)
             print(img.min())

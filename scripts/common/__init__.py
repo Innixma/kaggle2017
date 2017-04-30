@@ -13,9 +13,12 @@ def plot_slice(img, slice=80):
 def plot_3d(image, threshold=-100):
     # Position the scan upright,
     # so the head of the patient would be at the top facing the camera
+    # p = image.transpose(2,1,0)
     p = image
 
-    verts, faces = measure.marching_cubes(p, threshold)
+    results = measure.marching_cubes(p, threshold)
+    verts = results[0]
+    faces = results[1]
 
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(111, projection='3d')
@@ -30,7 +33,7 @@ def plot_3d(image, threshold=-100):
     ax.set_ylim(0, p.shape[1])
     ax.set_zlim(0, p.shape[2])
 
-    plt.show()
+    plt.savefig('plot3d.png')
 
 
 def save(arr, pth):
@@ -44,3 +47,22 @@ def load(pth):
 
 def read_mapping_file(pth):
     return pd.read_csv(pth)
+
+def shuffle_weights(model, weights=None):
+    """Randomly permute the weights in `model`, or the given `weights`.
+
+    This is a fast approximation of re-initializing the weights of a model.
+
+    Assumes weights are distributed independently of the dimensions of the weight tensors
+      (i.e., the weights have the same distribution along each dimension).
+
+    :param Model model: Modify the weights of the given model.
+    :param list(ndarray) weights: The model's weights will be replaced by a random permutation of these weights.
+      If `None`, permute the model's current weights.
+    """
+    if weights is None:
+        weights = model.get_weights()
+    weights = [np.random.permutation(w.flat).reshape(w.shape) for w in weights]
+    # Faster, but less random: only permutes along the first dimension
+    # weights = [np.random.permutation(w) for w in weights]
+    model.set_weights(weights)

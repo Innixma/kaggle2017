@@ -3,10 +3,12 @@ import dicom
 import glob
 from matplotlib import pyplot as plt
 
-from resnet50 import ResNet50
-
 import os
 import cv2
+
+from common import plot_3d
+
+from sklearn.metrics import confusion_matrix
 
 import pandas as pd
 from sklearn import cross_validation, metrics
@@ -14,13 +16,6 @@ import xgboost as xgb
 import scipy.ndimage
 from skimage import measure
 from keras.applications.imagenet_utils import preprocess_input
-from sklearn.pipeline import Pipeline
-from sklearn.decomposition import PCA
-
-
-def get_extractor():
-    model = ResNet50(include_top=False, weights='imagenet')
-    return model
 
 
 def get_dicom(path):
@@ -124,8 +119,26 @@ def remove_background(image):
 def get_data_id(path):
     dicom = get_dicom(path)
     sample_image = get_pixels_hu(dicom)
+    plt.hist(sample_image.flatten(), bins=80, color='c')
+    plt.xlabel("Hounsfield Units (HU)")
+    plt.ylabel("Frequency")
+    plt.show()
+
     sample_image = resample(sample_image, dicom, [1, 1, 1])
+    print(sample_image.shape)
+    plot_3d(sample_image, 700)
+
     sample_image = normalize(sample_image)
+    plt.hist(sample_image.flatten(), bins=80, color='c')
+    plt.xlabel("Normalized Hounsfield Units (HU)")
+    plt.ylabel("Frequency")
+    plt.show()
+
+    # Show some slice in the middle
+    plt.imshow(sample_image[80], cmap=plt.cm.gray)
+    plt.show()
+
+
 
     # f, plots = plt.subplots(4, 5, sharex='col', sharey='row', figsize=(10, 8))
 
@@ -158,87 +171,8 @@ def get_data_id(path):
 
 
 def calc_features(path):
-    net = get_extractor()
-    for folder in glob.glob(os.path.join(path, '*')):
-        base = os.path.basename(folder)
-        if not os.path.exists(os.path.join(FEATURES_DIR, '%s.npy' % base)):
-            batch = get_data_id(folder)
-            feats = []
-            for i in range(batch.shape[0]):
-                print(batch[0].shape)
-                feats.append(net.predict(batch[i]))
-            feats = np.array(feats)
-            print(feats.shape)
-            np.save(os.path.join(FEATURES_DIR, '%s.npy' % base), feats)
-
-
-def train_xgboost():
-    df = pd.read_csv(os.path.join(DATA_DIR, 'stage1_labels_all.csv'))
-    print(df.head())
-
-    mask = np.array([True if os.path.exists(os.path.join(FEATURES_DIR, '%s.npy' % str(id))) else False for id in df['id'].tolist()])
-
-    df = df.ix[mask]
-
-    x = []
-    for i, id in enumerate(df['id'].tolist()):
-        x.append(np.median(np.load(os.path.join(FEATURES_DIR, '%s.npy' % str(id))), axis=0))
-        if i % 15 == 0:
-            print(i)
-    x = np.array(x)
-
-    y = df['cancer'].as_matrix()
-
-    x = x.reshape((x.shape[0], x.shape[-1]))
-
-    trn_x, val_x, trn_y, val_y = cross_validation.train_test_split(x, y, random_state=42, stratify=y,
-                                                                   test_size=0.10)
-
-    clf = xgb.XGBRegressor(max_depth=20,
-        n_estimators=10000,
-        min_child_weight=20,
-        learning_rate=0.05,
-        nthread=8,
-        subsample=0.80,
-        colsample_bytree=0.80,
-        seed=3200)
-
-    clf.fit(trn_x, trn_y, eval_set=[(val_x, val_y)], verbose=True, eval_metric='logloss', early_stopping_rounds=50)
-
-    return clf
-
-
-def make_submit():
-    clf = train_xgboost()
-
-    df = pd.read_csv(os.path.join(DATA_DIR, 'stage2_sample_submission.csv'))
-
-    mask = np.array(
-        [True if os.path.exists(os.path.join(FEATURES_DIR, '%s.npy' % str(id))) else False for id in df['id'].tolist()])
-
-    df = df.ix[mask]
-
-    x = np.array([np.median(np.load(os.path.join(FEATURES_DIR, '%s.npy' % str(id))), axis=0) for id in df['id'].tolist()])
-    x = x.reshape((x.shape[0], x.shape[-1]))
-
-    pred = clf.predict(x)
-
-    df['cancer'] = pred
-    df.to_csv('subm2.csv', index=False)
-    print(df.head())
-
-
-def calc_log_loss():
-    df_pred = pd.read_csv('subm1.csv')
-
-    df_truth = pd.read_csv(os.path.join(DATA_DIR, 'stage1_solution.csv'))
-
-    df_truth.sort_values(['id'])
-    df_pred.sort_values(['id'])
-
-    pred = df_pred['cancer'].values
-    truth = df_truth['cancer'][df_truth['id'].isin(df_pred['id'])].values
-    print(metrics.log_loss(truth, pred))
+    folder = glob.glob(os.path.join(path, '*'))[0]
+    batch = get_data_id(folder)
 
 
 if __name__ == '__main__':
@@ -248,6 +182,3 @@ if __name__ == '__main__':
     FEATURES_DIR = os.path.join('features')
 
     calc_features(DICOM_DIR)
-    calc_features(DICOM_DIR_2)
-    make_submit()
-    calc_log_loss()

@@ -1,0 +1,249 @@
+C:\toolkits\anaconda2-4.2.0\python.exe D:/Projects/lung/kaggle2017/scripts/baseline.py
+C:\toolkits\anaconda2-4.2.0\lib\site-packages\sklearn\cross_validation.py:44: DeprecationWarning: This module was deprecated in version 0.18 in favor of the model_selection module into which all the refactored classes and functions are moved. Also note that the interface of the new CV iterators are different from that of this module. This module will be removed in 0.20.
+  "This module will be removed in 0.20.", DeprecationWarning)
+Using Theano backend.
+WARNING (theano.sandbox.cuda): The cuda backend is deprecated and will be removed in the next release (v0.10).  Please switch to the gpuarray backend. You can get more information about how to switch at this URL:
+ https://github.com/Theano/Theano/wiki/Converting-to-the-new-gpu-back-end%28gpuarray%29
+
+Using gpu device 0: GeForce GTX 970 (CNMeM is enabled with initial size: 80.0% of memory, cuDNN 5105)
+                                 id  cancer
+0  0015ceb851d7251b8f399e39779d1e7d       1
+1  0030a160d58723ff36d73f41b170ec21       0
+2  003f41c78e6acfa92430a057ac0b306e       0
+3  006b96310a37b36cccb2ab48d10b49a3       1
+4  008464bb8521d09a42985dd8add3d0d2       1
+0
+15
+30
+45
+60
+75
+90
+105
+120
+135
+150
+165
+180
+195
+210
+225
+240
+255
+270
+285
+300
+315
+330
+345
+360
+375
+390
+405
+420
+435
+450
+465
+480
+495
+510
+525
+540
+555
+570
+585
+600
+615
+630
+645
+660
+675
+690
+705
+720
+735
+750
+765
+780
+795
+810
+825
+840
+855
+870
+885
+900
+915
+930
+945
+960
+975
+990
+1005
+1020
+1035
+1050
+1065
+1080
+1095
+1110
+1125
+1140
+1155
+1170
+1185
+1200
+1215
+1230
+1245
+1260
+1275
+1290
+1305
+1320
+1335
+1350
+1365
+1380
+1395
+[0]	validation_0-error:0.21957	validation_0-logloss:0.67162	validation_1-error:0.35	validation_1-logloss:0.680684
+Multiple eval metrics have been passed: 'validation_1-logloss' will be used for early stopping.
+
+Will train until validation_1-logloss hasn't improved in 50 rounds.
+[1]	validation_0-error:0.176611	validation_0-logloss:0.650557	validation_1-error:0.321429	validation_1-logloss:0.670653
+[2]	validation_0-error:0.157518	validation_0-logloss:0.631054	validation_1-error:0.307143	validation_1-logloss:0.660511
+[3]	validation_0-error:0.145585	validation_0-logloss:0.614529	validation_1-error:0.3	validation_1-logloss:0.653046
+[4]	validation_0-error:0.133652	validation_0-logloss:0.596476	validation_1-error:0.278571	validation_1-logloss:0.642506
+[5]	validation_0-error:0.133652	validation_0-logloss:0.579984	validation_1-error:0.264286	validation_1-logloss:0.6339
+[6]	validation_0-error:0.127287	validation_0-logloss:0.564259	validation_1-error:0.257143	validation_1-logloss:0.625518
+[7]	validation_0-error:0.118536	validation_0-logloss:0.548559	validation_1-error:0.264286	validation_1-logloss:0.622517
+[8]	validation_0-error:0.107399	validation_0-logloss:0.533614	validation_1-error:0.271429	validation_1-logloss:0.617548
+[9]	validation_0-error:0.112172	validation_0-logloss:0.520191	validation_1-error:0.271429	validation_1-logloss:0.613041
+[10]	validation_0-error:0.104216	validation_0-logloss:0.507322	validation_1-error:0.257143	validation_1-logloss:0.60636
+[11]	validation_0-error:0.108194	validation_0-logloss:0.494638	validation_1-error:0.257143	validation_1-logloss:0.605867
+[12]	validation_0-error:0.093874	validation_0-logloss:0.48202	validation_1-error:0.264286	validation_1-logloss:0.597676
+[13]	validation_0-error:0.083532	validation_0-logloss:0.470207	validation_1-error:0.271429	validation_1-logloss:0.593943
+[14]	validation_0-error:0.085919	validation_0-logloss:0.459756	validation_1-error:0.271429	validation_1-logloss:0.590977
+[15]	validation_0-error:0.079554	validation_0-logloss:0.449109	validation_1-error:0.271429	validation_1-logloss:0.585906
+[16]	validation_0-error:0.075577	validation_0-logloss:0.439254	validation_1-error:0.271429	validation_1-logloss:0.585814
+[17]	validation_0-error:0.070804	validation_0-logloss:0.429184	validation_1-error:0.264286	validation_1-logloss:0.58462
+[18]	validation_0-error:0.070008	validation_0-logloss:0.419921	validation_1-error:0.257143	validation_1-logloss:0.584072
+[19]	validation_0-error:0.06603	validation_0-logloss:0.411171	validation_1-error:0.257143	validation_1-logloss:0.582978
+[20]	validation_0-error:0.061257	validation_0-logloss:0.401992	validation_1-error:0.271429	validation_1-logloss:0.581085
+[21]	validation_0-error:0.063644	validation_0-logloss:0.392591	validation_1-error:0.271429	validation_1-logloss:0.580044
+[22]	validation_0-error:0.059666	validation_0-logloss:0.38368	validation_1-error:0.264286	validation_1-logloss:0.577625
+[23]	validation_0-error:0.052506	validation_0-logloss:0.375434	validation_1-error:0.264286	validation_1-logloss:0.576212
+[24]	validation_0-error:0.050915	validation_0-logloss:0.366587	validation_1-error:0.257143	validation_1-logloss:0.572466
+[25]	validation_0-error:0.046142	validation_0-logloss:0.358852	validation_1-error:0.257143	validation_1-logloss:0.5726
+[26]	validation_0-error:0.047733	validation_0-logloss:0.35053	validation_1-error:0.271429	validation_1-logloss:0.571587
+[27]	validation_0-error:0.039777	validation_0-logloss:0.34325	validation_1-error:0.278571	validation_1-logloss:0.572077
+[28]	validation_0-error:0.035004	validation_0-logloss:0.335803	validation_1-error:0.278571	validation_1-logloss:0.570759
+[29]	validation_0-error:0.033413	validation_0-logloss:0.329593	validation_1-error:0.271429	validation_1-logloss:0.569139
+[30]	validation_0-error:0.024662	validation_0-logloss:0.322731	validation_1-error:0.264286	validation_1-logloss:0.566004
+[31]	validation_0-error:0.023866	validation_0-logloss:0.316183	validation_1-error:0.264286	validation_1-logloss:0.563475
+[32]	validation_0-error:0.019889	validation_0-logloss:0.309807	validation_1-error:0.264286	validation_1-logloss:0.564193
+[33]	validation_0-error:0.017502	validation_0-logloss:0.303642	validation_1-error:0.271429	validation_1-logloss:0.565242
+[34]	validation_0-error:0.015911	validation_0-logloss:0.297534	validation_1-error:0.257143	validation_1-logloss:0.564723
+[35]	validation_0-error:0.013524	validation_0-logloss:0.29146	validation_1-error:0.271429	validation_1-logloss:0.564967
+[36]	validation_0-error:0.011138	validation_0-logloss:0.285465	validation_1-error:0.264286	validation_1-logloss:0.564308
+[37]	validation_0-error:0.008751	validation_0-logloss:0.279798	validation_1-error:0.264286	validation_1-logloss:0.564751
+[38]	validation_0-error:0.007955	validation_0-logloss:0.274329	validation_1-error:0.257143	validation_1-logloss:0.564069
+[39]	validation_0-error:0.005569	validation_0-logloss:0.268927	validation_1-error:0.264286	validation_1-logloss:0.56249
+[40]	validation_0-error:0.005569	validation_0-logloss:0.264215	validation_1-error:0.264286	validation_1-logloss:0.561845
+[41]	validation_0-error:0.004773	validation_0-logloss:0.258949	validation_1-error:0.271429	validation_1-logloss:0.561429
+[42]	validation_0-error:0.003182	validation_0-logloss:0.253731	validation_1-error:0.271429	validation_1-logloss:0.56377
+[43]	validation_0-error:0.003182	validation_0-logloss:0.248604	validation_1-error:0.264286	validation_1-logloss:0.561429
+[44]	validation_0-error:0.002387	validation_0-logloss:0.243838	validation_1-error:0.271429	validation_1-logloss:0.5618
+[45]	validation_0-error:0.001591	validation_0-logloss:0.23943	validation_1-error:0.278571	validation_1-logloss:0.563035
+[46]	validation_0-error:0.002387	validation_0-logloss:0.234855	validation_1-error:0.264286	validation_1-logloss:0.564348
+[47]	validation_0-error:0.001591	validation_0-logloss:0.23073	validation_1-error:0.271429	validation_1-logloss:0.563461
+[48]	validation_0-error:0.000796	validation_0-logloss:0.226168	validation_1-error:0.271429	validation_1-logloss:0.564209
+[49]	validation_0-error:0.000796	validation_0-logloss:0.222153	validation_1-error:0.271429	validation_1-logloss:0.564499
+[50]	validation_0-error:0	validation_0-logloss:0.218122	validation_1-error:0.257143	validation_1-logloss:0.563566
+[51]	validation_0-error:0	validation_0-logloss:0.213807	validation_1-error:0.264286	validation_1-logloss:0.563796
+[52]	validation_0-error:0	validation_0-logloss:0.21008	validation_1-error:0.264286	validation_1-logloss:0.563715
+[53]	validation_0-error:0	validation_0-logloss:0.206479	validation_1-error:0.271429	validation_1-logloss:0.56364
+[54]	validation_0-error:0	validation_0-logloss:0.202884	validation_1-error:0.271429	validation_1-logloss:0.563189
+[55]	validation_0-error:0	validation_0-logloss:0.199406	validation_1-error:0.271429	validation_1-logloss:0.56448
+[56]	validation_0-error:0	validation_0-logloss:0.195683	validation_1-error:0.264286	validation_1-logloss:0.562482
+[57]	validation_0-error:0	validation_0-logloss:0.192467	validation_1-error:0.264286	validation_1-logloss:0.561353
+[58]	validation_0-error:0	validation_0-logloss:0.18911	validation_1-error:0.257143	validation_1-logloss:0.561587
+[59]	validation_0-error:0	validation_0-logloss:0.18574	validation_1-error:0.257143	validation_1-logloss:0.561922
+[60]	validation_0-error:0	validation_0-logloss:0.182348	validation_1-error:0.257143	validation_1-logloss:0.56319
+[61]	validation_0-error:0	validation_0-logloss:0.17864	validation_1-error:0.264286	validation_1-logloss:0.564624
+[62]	validation_0-error:0	validation_0-logloss:0.175522	validation_1-error:0.264286	validation_1-logloss:0.565444
+[63]	validation_0-error:0	validation_0-logloss:0.172603	validation_1-error:0.264286	validation_1-logloss:0.566468
+[64]	validation_0-error:0	validation_0-logloss:0.169531	validation_1-error:0.264286	validation_1-logloss:0.566148
+[65]	validation_0-error:0	validation_0-logloss:0.166579	validation_1-error:0.25	validation_1-logloss:0.56558
+[66]	validation_0-error:0	validation_0-logloss:0.163438	validation_1-error:0.25	validation_1-logloss:0.566572
+[67]	validation_0-error:0	validation_0-logloss:0.160682	validation_1-error:0.257143	validation_1-logloss:0.566908
+[68]	validation_0-error:0	validation_0-logloss:0.158176	validation_1-error:0.264286	validation_1-logloss:0.568257
+[69]	validation_0-error:0	validation_0-logloss:0.155565	validation_1-error:0.257143	validation_1-logloss:0.568153
+[70]	validation_0-error:0	validation_0-logloss:0.152935	validation_1-error:0.264286	validation_1-logloss:0.567931
+[71]	validation_0-error:0	validation_0-logloss:0.150218	validation_1-error:0.257143	validation_1-logloss:0.56709
+[72]	validation_0-error:0	validation_0-logloss:0.147854	validation_1-error:0.257143	validation_1-logloss:0.566523
+[73]	validation_0-error:0	validation_0-logloss:0.145209	validation_1-error:0.264286	validation_1-logloss:0.568977
+[74]	validation_0-error:0	validation_0-logloss:0.143042	validation_1-error:0.257143	validation_1-logloss:0.569508
+[75]	validation_0-error:0	validation_0-logloss:0.140397	validation_1-error:0.264286	validation_1-logloss:0.56905
+[76]	validation_0-error:0	validation_0-logloss:0.138006	validation_1-error:0.264286	validation_1-logloss:0.569451
+[77]	validation_0-error:0	validation_0-logloss:0.135465	validation_1-error:0.25	validation_1-logloss:0.567848
+[78]	validation_0-error:0	validation_0-logloss:0.133162	validation_1-error:0.257143	validation_1-logloss:0.56627
+[79]	validation_0-error:0	validation_0-logloss:0.130774	validation_1-error:0.257143	validation_1-logloss:0.565177
+[80]	validation_0-error:0	validation_0-logloss:0.128682	validation_1-error:0.257143	validation_1-logloss:0.564764
+[81]	validation_0-error:0	validation_0-logloss:0.126618	validation_1-error:0.257143	validation_1-logloss:0.565111
+[82]	validation_0-error:0	validation_0-logloss:0.124366	validation_1-error:0.264286	validation_1-logloss:0.565215
+[83]	validation_0-error:0	validation_0-logloss:0.122315	validation_1-error:0.264286	validation_1-logloss:0.565064
+[84]	validation_0-error:0	validation_0-logloss:0.120397	validation_1-error:0.264286	validation_1-logloss:0.564876
+[85]	validation_0-error:0	validation_0-logloss:0.118385	validation_1-error:0.257143	validation_1-logloss:0.564072
+[86]	validation_0-error:0	validation_0-logloss:0.116406	validation_1-error:0.264286	validation_1-logloss:0.563541
+[87]	validation_0-error:0	validation_0-logloss:0.114326	validation_1-error:0.257143	validation_1-logloss:0.564173
+[88]	validation_0-error:0	validation_0-logloss:0.112614	validation_1-error:0.25	validation_1-logloss:0.564597
+[89]	validation_0-error:0	validation_0-logloss:0.110822	validation_1-error:0.264286	validation_1-logloss:0.565889
+[90]	validation_0-error:0	validation_0-logloss:0.109065	validation_1-error:0.264286	validation_1-logloss:0.565683
+[91]	validation_0-error:0	validation_0-logloss:0.10731	validation_1-error:0.257143	validation_1-logloss:0.565426
+[92]	validation_0-error:0	validation_0-logloss:0.105523	validation_1-error:0.257143	validation_1-logloss:0.565212
+[93]	validation_0-error:0	validation_0-logloss:0.103913	validation_1-error:0.25	validation_1-logloss:0.56511
+[94]	validation_0-error:0	validation_0-logloss:0.102194	validation_1-error:0.25	validation_1-logloss:0.565311
+[95]	validation_0-error:0	validation_0-logloss:0.100437	validation_1-error:0.25	validation_1-logloss:0.565788
+[96]	validation_0-error:0	validation_0-logloss:0.098968	validation_1-error:0.25	validation_1-logloss:0.566121
+[97]	validation_0-error:0	validation_0-logloss:0.097434	validation_1-error:0.25	validation_1-logloss:0.56654
+[98]	validation_0-error:0	validation_0-logloss:0.095775	validation_1-error:0.257143	validation_1-logloss:0.565998
+[99]	validation_0-error:0	validation_0-logloss:0.094354	validation_1-error:0.242857	validation_1-logloss:0.5662
+[100]	validation_0-error:0	validation_0-logloss:0.092775	validation_1-error:0.242857	validation_1-logloss:0.566159
+[101]	validation_0-error:0	validation_0-logloss:0.091365	validation_1-error:0.242857	validation_1-logloss:0.565759
+[102]	validation_0-error:0	validation_0-logloss:0.089933	validation_1-error:0.257143	validation_1-logloss:0.566762
+[103]	validation_0-error:0	validation_0-logloss:0.088467	validation_1-error:0.25	validation_1-logloss:0.566985
+[104]	validation_0-error:0	validation_0-logloss:0.087252	validation_1-error:0.25	validation_1-logloss:0.567956
+[105]	validation_0-error:0	validation_0-logloss:0.085775	validation_1-error:0.25	validation_1-logloss:0.567881
+[106]	validation_0-error:0	validation_0-logloss:0.084317	validation_1-error:0.242857	validation_1-logloss:0.567721
+[107]	validation_0-error:0	validation_0-logloss:0.082978	validation_1-error:0.25	validation_1-logloss:0.568712
+Stopping. Best iteration:
+[57]	validation_0-error:0	validation_0-logloss:0.192467	validation_1-error:0.264286	validation_1-logloss:0.561353
+
+                                 id    cancer
+0  026470d51482c93efc18b9803159c960  0.347540
+1  031b7ec4fe96a3b035a8196264a8c8c3  0.235544
+2  03bd22ed5858039af223c04993e9eb22  0.277400
+3  06a90409e4fcea3e634748b967993531  0.400670
+4  07b1defcfae5873ee1f03c90255eb170  0.527078
+
+# Logloss Xgboost
+0.592574173836
+# Logloss all 1s
+24.5963647218
+# Logloss all 0s
+9.94298108338
+# Logloss all .5
+0.69314718056
+
+# Classifier results
+[[136  53]
+ [  5   4]]
+ # All 1s prediction
+[[  0   0]
+ [141  57]]
+ # All 0s prediction
+[[141  57]
+ [  0   0]]
+
+Process finished with exit code 0

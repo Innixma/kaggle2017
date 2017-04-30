@@ -9,6 +9,7 @@ import dicom
 import os
 import scipy.ndimage
 
+
 from skimage import measure, morphology
 from skimage.segmentation import clear_border
 import time
@@ -78,26 +79,6 @@ def get_pixels_hu(slices):
     return np.array(image, dtype=np.int16)
 
 
-def resample(image, scan, new_spacing=[1, 1, 1]):
-    # Determine current pixel spacing
-    spacing = np.array([scan[0].SliceThickness] + scan[0].PixelSpacing, dtype=np.float32)
-
-    #debugging
-    # b8bb02d229361a623a4dc57aa0e5c485
-
-    resize_factor = spacing / new_spacing
-    new_real_shape = image.shape * resize_factor
-    new_shape = np.round(new_real_shape)
-    real_resize_factor = new_shape / image.shape
-    # This is breaking occasionally
-    # new_spacing = spacing / real_resize_factor
-    new_spacing = spacing / real_resize_factor
-
-    image = scipy.ndimage.interpolation.zoom(image, real_resize_factor, order=1, mode='nearest')
-
-    return image, new_spacing
-
-
 def largest_label_volume(im, bg=-1):
     vals, counts = np.unique(im, return_counts=True)
 
@@ -116,16 +97,6 @@ def segment_lung_mask(image, fill_lung_structures=True):
     binary_image = np.array(image > -400, dtype=np.int8) + 1
     binary_image = np.array([clear_border(binary_image[i]) for i in range(binary_image.shape[0])])
     labels = measure.label(binary_image)
-
-    # Pick the pixel in the very corner to determine which label is air.
-    #   Improvement: Pick multiple background labels from around the patient
-    #   More resistant to "trays" on which the patient lays cutting the air
-    #   around the person in half
-    # for corner in labels[0, 0, :], labels[0, -1, :], labels[-1, -1, :], labels[-1, 0, :]:
-    #     background_label = np.argmax(np.bincount(corner))
-    #
-    #     # Fill the air around the person
-    #     binary_image[background_label == labels] = 2
 
     # Pick the pixel in the very corner to determine which label is air.
     #   Improvement: Pick multiple background labels from around the patient

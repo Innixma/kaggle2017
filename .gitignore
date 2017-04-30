@@ -181,3 +181,8 @@ sftp-config.json
 
 # Custom entries
 data
+features
+features_shuffled
+submissions
+logs
+models
